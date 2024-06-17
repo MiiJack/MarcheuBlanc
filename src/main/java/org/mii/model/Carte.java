@@ -14,4 +14,14 @@ public record Carte(List<Lieux> lieux, List<Rues> rues) {
         }
         return voisin;
     }
+
+    public Rues getRue(Lieux lieux1, Lieux lieux2) {
+        for (Rues rue : rues) {
+            if ((rue.getLieuxRelies()[0].equals(lieux1) && rue.getLieuxRelies()[1].equals(lieux2)) ||
+                    (rue.getLieuxRelies()[0].equals(lieux2) && rue.getLieuxRelies()[1].equals(lieux1))) {
+                return rue;
+            }
+        }
+        return null;
+    }
 }
