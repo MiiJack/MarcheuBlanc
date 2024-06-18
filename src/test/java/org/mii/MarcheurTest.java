@@ -24,25 +24,15 @@ class MarcheurTest {
         var boulevard = new Lieux("Boulevard de l'Europe");
         var esti = new Lieux("ESTI");
 
-        Lieux[] lieuxArray1 = {marais, sekolintsika};
-        Lieux[] lieuxArray2 = {sekolintsika, hei};
-        Lieux[] lieuxArray3 = {hei, pullman};
-        Lieux[] lieuxArray4 = {hei, balancoire};
-        Lieux[] lieuxArray5 = {pullman, nexta};
-        Lieux[] lieuxArray6 = {pullman, balancoire};
-        Lieux[] lieuxArray7 = {balancoire, boulevard};
-        Lieux[] lieuxArray8 = {balancoire, esti};
-        Lieux[] lieuxArray9 = {boulevard, esti};
-
-        var r_marais_sekolintsika = new Rues("Marais_Sekolintsika", lieuxArray1);
-        var r_sekolintsika_hei = new Rues("Sekolintsika_HEI", lieuxArray2);
-        var r_andriantsihorana = new Rues("Rue Andriantsihorana", lieuxArray3);
-        var r_hei_balancoire = new Rues("HEI_Balancoire", lieuxArray4);
-        var r_pullman_nexta = new Rues("Pullman_NEXTA", lieuxArray5);
-        var r_ranaivo = new Rues("Rue Ranaivo", lieuxArray6);
-        var r_balancoire_boulevard = new Rues("Balancoire_Boulevard", lieuxArray7);
-        var r_balancoire_esti = new Rues("Balancoire_ESTI", lieuxArray8);
-        var r_boulevard_esti = new Rues("Boulevard_ESTI", lieuxArray9);
+        var r_marais_sekolintsika = new Rues("Marais_Sekolintsika", marais, sekolintsika);
+        var r_sekolintsika_hei = new Rues("Sekolintsika_HEI", sekolintsika, hei);
+        var r_andriantsihorana = new Rues("Rue Andriantsihorana", hei, pullman);
+        var r_hei_balancoire = new Rues("HEI_Balancoire", hei, balancoire);
+        var r_pullman_nexta = new Rues("Pullman_NEXTA", pullman, nexta);
+        var r_ranaivo = new Rues("Rue Ranaivo", pullman, balancoire);
+        var r_balancoire_boulevard = new Rues("Balancoire_Boulevard", balancoire, boulevard);
+        var r_balancoire_esti = new Rues("Balancoire_ESTI", balancoire, esti);
+        var r_boulevard_esti = new Rues("Boulevard_ESTI", boulevard, esti);
 
         List<Lieux> lieuxDAntananarivo = List.of(marais, hei, pullman, nexta, balancoire, boulevard, esti);
         List<Rues> ruesDAntananarivo = List.of(r_marais_sekolintsika, r_sekolintsika_hei, r_andriantsihorana,
@@ -50,9 +40,36 @@ class MarcheurTest {
 
         Carte antananarivo = new Carte(lieuxDAntananarivo, ruesDAntananarivo);
 
-        List<Lieux> chemin1 = marcheurBlanc1.marche(hei, esti, antananarivo);
-        List<Lieux> chemin2 = marcheurBlanc2.marche(hei, esti, antananarivo);
+        List<Lieux> chemin1 = marcheurBlanc1.marche(hei, esti);
+        List<Lieux> chemin2 = marcheurBlanc2.marche(hei, esti);
 
         assertNotEquals(chemin1, chemin2);
+
+        // Check if chemin1 and chemin2 are valid paths in the Carte
+        assertValidPath(antananarivo, chemin1);
+        assertValidPath(antananarivo, chemin2);
+
+        // Check if the first element is "HEI" and the last element is "ESTI"
+        assertFirstLastElement(chemin1, hei, esti);
+        assertFirstLastElement(chemin2, hei, esti);
     }
+
+    private void assertValidPath(Carte carte, List<Lieux> chemin) {
+        for (int i = 0; i < chemin.size() - 1; i++) {
+            Lieux current = chemin.get(i);
+            Lieux next = chemin.get(i + 1);
+            Rues road = carte.rues().stream()
+                    .filter(r -> (r.getLieu1().equals(current) && r.getLieu2().equals(next)) ||
+                            (r.getLieu1().equals(next) && r.getLieu2().equals(current)))
+                    .findFirst()
+                    .orElse(null);
+            assert road != null : "Invalid path: No road between " + current + " and " + next;
+        }
+    }
+
+    private void assertFirstLastElement(List<Lieux> chemin, Lieux debut, Lieux fin) {
+        assert chemin.getFirst().equals(debut) : "First element is not " + debut;
+        assert chemin.getLast().equals(fin) : "Last element is not " + fin;
+    }
+
 }
