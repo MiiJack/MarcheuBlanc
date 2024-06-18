@@ -17,6 +17,16 @@ public final class Marcheur {
         return rueVersVoisin != null ? rueVersVoisin.getPassages() : Integer.MAX_VALUE;
     }
 
+    private static List<Lieux> getVoisinsAvecMoinsDePassages(Carte carte, Lieux actuel, List<Lieux> voisins) {
+        return voisins.stream()
+                .sorted(Comparator.comparingInt(v -> getRuePassages(carte, actuel, v)))
+                .collect(ArrayList::new, (list, v) -> {
+                    if (list.isEmpty() || getRuePassages(carte, actuel, v) == getRuePassages(carte, actuel, list.getFirst())) {
+                        list.add(v);
+                    }
+                }, ArrayList::addAll);
+    }
+
     public List<Lieux> marche(Lieux debut, Lieux fin, Carte carte) {
         List<Lieux> chemin = new ArrayList<>();
         Lieux actuel = debut;
@@ -28,18 +38,7 @@ public final class Marcheur {
                 break;
             }
 
-            List<Lieux> voisinsTriesParPassages = new ArrayList<>(voisins);
-            Lieux finalActuel = actuel;
-            voisinsTriesParPassages.sort(Comparator.comparingInt(v -> getRuePassages(carte, finalActuel, v)));
-
-            int minPassages = voisinsTriesParPassages.stream()
-                    .mapToInt(v -> getRuePassages(carte, finalActuel, v))
-                    .min()
-                    .orElse(Integer.MAX_VALUE);
-
-            List<Lieux> voisinsAvecMoinsDePassages = voisinsTriesParPassages.stream()
-                    .filter(v -> getRuePassages(carte, finalActuel, v) == minPassages)
-                    .toList();
+            List<Lieux> voisinsAvecMoinsDePassages = getVoisinsAvecMoinsDePassages(carte, actuel, voisins);
 
             Lieux prochainLieux = voisinsAvecMoinsDePassages.get(random.nextInt(voisinsAvecMoinsDePassages.size()));
             Rues rueVersProchain = carte.getRue(actuel, prochainLieux);
